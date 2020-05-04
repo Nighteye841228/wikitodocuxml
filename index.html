@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="twicon/twicon.css" />
+    <link rel="shortcut icon" href="twicon/taiwan.png" type="image/x-icon" />
+    <title>WikiToDocuXML</title>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.8.0/css/bulma.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.1/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.0.min.js"
+        crossorigin="anonymous"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/vue-clipboard2/0.3.1/vue-clipboard.min.js"></script>
+
+</head>
+
+<style>
+    [v-cloak] {
+        display: none;
+    }
+</style>
+
+<body>
+    <div id="app">
+        <div class="modal" :class={'is-active':isAddExtendedLinks}>
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">選擇需要的關鍵字</p>
+                    <button class="delete" aria-label="close"
+                        @click="confirmAdd(0)"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div v-for="(link,index) in extendedLinks"><input
+                            type="checkbox" :value="link"
+                            v-model="confirmLinks">{{ link }}
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-success"
+                        @click="confirmAdd(1)">Save changes</button>
+                    <button class="button"
+                        @click="confirmAdd(0)">Cancel</button>
+                </footer>
+            </div>
+        </div>
+
+        <section class="hero is-info">
+            <div class="hero-body">
+                <div class="container">
+                    <h1 class="title">
+                        WikiToDocuXML
+                    </h1>
+                    <h2 class="subtitle">
+                        維基文庫轉數位人文研究平台建置工具
+                    </h2>
+                </div>
+            </div>
+        </section>
+
+        <div class="section">
+            <form @submit.prevent="checkForm" method="POST">
+                <div class="container">
+                    <div class="field">
+                        <label class="label is-large">輸入需要的wiki
+                            source網址<span
+                                style="font-size:12pt">（可輸入多筆分行，系統將自動彙整）</span>
+                        </label>
+                        <div class="control">
+                            <textarea rows="10" class="textarea"
+                                :class="urlFieldHint" placeholder="Wikisource標題"
+                                v-model=" wikiUrls"
+                                name="urlSendToServer"></textarea>
+                            <div v-if="isInputEmpty" v-cloak
+                                class="help is-danger is-size-5">
+                                查詢列為空
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <input value="深入搜索" type="button"
+                                @click="searchDeeper" class="button is-link" />
+                        </div>
+                        <div class="control">
+                            <input value="查詢" type="button"
+                                @click="parseWikiLinksFromUser"
+                                class="button is-link" />
+                        </div>
+                        <div class="control">
+                            <button class="button is-link is-light"
+                                type="button" @click="cleanUrlField">
+                                清空內容
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="section" v-if="isInputDataValid">
+            <div class="container">
+                <label class="label is-large">Metadata編輯(未填入資料則不會輸出欄位)</label>
+                <div class="field">
+                    <div class="control">
+                        <div class="table-container">
+                            <table
+                                class="table is-striped is-hoverable is-fullwidth">
+                                <thead>
+                                    <tr>
+                                        <th>文檔標題</th>
+                                        <td>作者</td>
+                                        <td>文本內容檢視</td>
+                                        <td>刪除此文本</td>
+                                    </tr>
+                                </thead>
+                                <tbody
+                                    v-for="(wikiDocument,index) in wikiDocuments">
+                                    <tr>
+                                        <th>{{ wikiDocument.isImport.title }}
+                                        </th>
+                                        <td><input type="text"
+                                                class="input is-normal"
+                                                v-model="wikiDocument.isImport.author">
+                                        </td>
+                                        <td><button type="button" class="button"
+                                                :class="{'is-link': wikiDocument.isContentOpen}"
+                                                @click="checkContentValue(wikiDocument)">檢視</button>
+                                        </td>
+                                        <td><button type="button" class="button"
+                                                @click="deleteContentValue(index)">刪除</button>
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td v-if="wikiDocument.isFixContent"
+                                            colspan="5">
+                                            <textarea class="textarea"
+                                                v-model="wikiDocument.isImport.doc_content"></textarea>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-link" type="button"
+                                    @click="compressToParagraph">
+                                    完成
+                                </button>
+                            </div>
+                            <label class="checkbox">
+                                <input type="checkbox" v-model="isAddHyperlink"
+                                    @change="compressToParagraph">是否紀錄超連結
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" v-if="isMetadataComplete">
+            <div class="container">
+                <div class="field">
+                    <label class="label is-large">編輯完成資料</label>
+                    <div id="wikiContents" class="control">
+                        <textarea class="textarea" v-model="wikiContents"
+                            rows="20"></textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="checkbox">
+                        <label class="radio">
+                            <input type="radio" v-model="isSeperateByParagraph"
+                                @change="compressToParagraph" name="question"
+                                value="seperateEachParagraph">
+                            以每一篇文件的段落分件
+                        </label>
+                        <label class="radio">
+                            <input type="radio" v-model="isSeperateByParagraph"
+                                @change="compressToParagraph" name="question"
+                                value="collapseEachParagraph">
+                            將文件壓縮為單一文件
+                        </label>
+                        <label class="radio">
+                            <input type="radio" v-model="isSeperateByParagraph"
+                                @change="compressToParagraph" name="question"
+                                value="default" checked>
+                            直接輸出所有文件
+                        </label>
+                    </label>
+                </div>
+                <div class="field is-grouped">
+                    <div class="control">
+                        <button class="button is-link" @click="download">
+                            輸出文本
+                        </button>
+                        <button class="button is-link"
+                            v-clipboard:copy="wikiContents"
+                            v-clipboard:success="onCopy">
+                            複製於剪貼簿
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="main.js"></script>
+</body>
+
+<script src="./main.js"></script>
+<script src="./jqueryRegexPlugin.js"></script>
+
+</html>
