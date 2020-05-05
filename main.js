@@ -26,7 +26,8 @@ const app = new Vue({
         isSeperateByParagraph: "default",
         isAddExtendedLinks: false,
         extendedLinks: [],
-        confirmLinks: []
+        confirmLinks: [],
+        sourceWord: ""
     },
     methods: {
         cleanUrlField: function () {
@@ -38,8 +39,14 @@ const app = new Vue({
         parseWikiLinksFromUser: function () {
             if (!this.checkForm()) return;
             for (wikiUrl of this.wikiUrls.split('\n')) {
-                getWikisourceJson(wikiUrl);
+                if (wikiUrl != "") { getWikisourceJson(wikiUrl); }
             }
+        },
+        getQueryResult: function () {
+            if (this.sourceWord == "") return;
+            this.extendedLinks = [];
+            this.confirmLinks = [];
+            searchWord(this.sourceWord);
         },
         searchDeeper: function () {
             this.extendedLinks = [];
@@ -169,6 +176,29 @@ async function getDeeperLink(pageNames) {
     }
     app.isAddExtendedLinks = true;
     // return { code: 'failed' };
+}
+
+async function searchWord(title) {
+    try {
+        let apiBackJson = await axios.get("https://zh.wikisource.org/w/api.php",
+            {
+                params: {
+                    action: "query",
+                    list: "search",
+                    srsearch: title,
+                    origin: "*",
+                    format: "json",
+                    utf8: ""
+                }
+            });
+        let outputs = await apiBackJson.data.query.search;
+        console.log(outputs);
+        app.extendedLinks = outputs.map(x => x.title);
+    } catch (error) {
+        console.log(error);
+        alert(`請求出錯！`);
+    }
+    app.isAddExtendedLinks = true;
 }
 
 function WikiXmlMetadata(title = "", author = "", doc_content = [], hyperlinks = []) {

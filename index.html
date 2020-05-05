@@ -5,7 +5,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="twicon/twicon.css" />
     <link rel="shortcut icon" href="twicon/taiwan.png" type="image/x-icon" />
     <title>WikiToDocuXML</title>
     <link rel="stylesheet"
@@ -65,11 +64,28 @@
         </section>
 
         <div class="section">
+            <div class="container">
+                <label class="label is-large">文本關鍵字搜索
+                </label>
+                <div class="field has-addons">
+                    <div class="control">
+                        <input v-model="sourceWord" class="input" type="text"
+                            placeholder="鄭氏紀事">
+                    </div>
+                    <div class="control">
+                        <a class="button is-link" @click="getQueryResult">
+                            搜尋
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
             <form @submit.prevent="checkForm" method="POST">
                 <div class="container">
                     <div class="field">
-                        <label class="label is-large">輸入需要的wiki
-                            source網址<span
+                        <label class="label is-large">在此輸入欲獲得內容之完整文本標題<span
                                 style="font-size:12pt">（可輸入多筆分行，系統將自動彙整）</span>
                         </label>
                         <div class="control">
@@ -85,11 +101,11 @@
                     </div>
                     <div class="field is-grouped">
                         <div class="control">
-                            <input value="深入搜索" type="button"
+                            <input value="延伸搜索相關文本" type="button"
                                 @click="searchDeeper" class="button is-link" />
                         </div>
                         <div class="control">
-                            <input value="查詢" type="button"
+                            <input value="獲取內文" type="button"
                                 @click="parseWikiLinksFromUser"
                                 class="button is-link" />
                         </div>
@@ -152,7 +168,7 @@
                             <div class="control">
                                 <button class="button is-link" type="button"
                                     @click="compressToParagraph">
-                                    完成
+                                    輸出XML
                                 </button>
                             </div>
                             <label class="checkbox">
