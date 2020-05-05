@@ -217,7 +217,7 @@ function WikiXmlMetadata(title = "", author = "", doc_content = [], hyperlinks =
     this.isImport.doc_category_l2 = "";
     this.isImport.doc_category_l3 = "";
     this.isImport.docclass = "";
-    this.isImport.doc_content = doc_content.join("");
+    this.isImport.doc_content = doc_content.join("\n");
     this.isImport.docclass_aux = "";
     this.isImport.doctype = "";
     this.isImport.doctype_aux = "";
@@ -294,8 +294,9 @@ function parseHtmlText(htmlContent) {
     let doc = new DOMParser().parseFromString(htmlContent, "text/html");
     let wikiContentSeperateParagraph = [];
     $(doc).find(`.mw-parser-output p,.mw-parser-output dd`).each(function (index, element) {
-        if (!/(^\r\n|^\n)|(屬於公有領域)/gm.test($(element).text())) {
-            wikiContentSeperateParagraph.push($(element).text());
+        let parseSentence = $(element).text().replace(/\s/gm, "");
+        if (!/( )|(屬於公有領域)/gm.test(parseSentence)) {
+            wikiContentSeperateParagraph.push(parseSentence);
         }
     });
     return wikiContentSeperateParagraph;
