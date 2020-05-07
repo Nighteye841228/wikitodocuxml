@@ -158,7 +158,7 @@
                                         <td v-if="wikiDocument.isFixContent"
                                             colspan="5">
                                             <textarea class="textarea"
-                                                v-model="wikiDocument.isImport.doc_content"></textarea>
+                                                v-model="wikiDocument.fulltext"></textarea>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -172,8 +172,8 @@
                                 </button>
                             </div>
                             <label class="checkbox">
-                                <input type="checkbox" v-model="isAddHyperlink"
-                                    @change="compressToParagraph">是否紀錄超連結
+                                <input type="checkbox"
+                                    v-model="isAddHyperlink">是否紀錄超連結
                             </label>
                         </div>
                     </div>
