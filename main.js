@@ -3,11 +3,6 @@ $(document).ready();
 const app = new Vue({
     el: "#app",
     computed: {
-        // thdlValidColumns: function() {
-        //     return this.thdlColumns.filter(function(thdlColumn) {
-        //         //  TODO: Filter isGetValueMetadata
-        //     });
-        // }
     },
     data: {
         newDocument: new WikiXmlMetadata(),
@@ -101,9 +96,6 @@ const app = new Vue({
             alert(`Copying Success!!`);
         },
         compressToParagraph: function () {
-            // this.wikiContents = (this.isSeperateByParagraph == true) ? convertAlltoParagraphs(this.wikiDocuments) :
-            //     convertAlltoDocuments(this.wikiDocuments);
-            // console.log(this.wikiContents);
             let answer = "";
             if (this.isSeperateByParagraph == "default") {
                 answer = convertAlltoDocuments(this.wikiDocuments, this.isAddHyperlink);
@@ -144,7 +136,6 @@ async function getWikisourceJson(pageName) {
         console.log(error);
         alert(`請求出錯！`);
     }
-    // return { code: 'failed' };
 }
 
 async function getDeeperLink(pageNames) {
@@ -161,7 +152,6 @@ async function getDeeperLink(pageNames) {
                         utf8: ""
                     }
                 });
-            // console.log(apiBackJson.data.parse);
             let newLinks = await getExtendedLinks(apiBackJson.data.parse)
             app.extendedLinks = app.extendedLinks.concat(newLinks);
         } catch (error) {
@@ -170,7 +160,6 @@ async function getDeeperLink(pageNames) {
         }
     }
     app.isAddExtendedLinks = true;
-    // return { code: 'failed' };
 }
 
 async function searchWord(title) {
@@ -265,7 +254,6 @@ function parseAuthor(htmlContent) {
 }
 
 function parseHtmlHyperlinkText(htmlContent) {
-    //TODO在doc_content裡面放入兩個obj value:Paragraph,wikilink
     let doc = new DOMParser().parseFromString(htmlContent, "text/html");
     let wikiContentSeperateParagraph = [];
     $(doc).find(`a`).each(function (index, element) {
@@ -301,7 +289,9 @@ function convertAlltoDocuments(wikiObjs, isAddHyperlink = true) {
     let allDocs = [];
     wikiObjs.forEach((obj, index) => {
         let fullContext = obj.tempContent.map(x => composeXmlString(x.paragraphs, "Paragraph", 1)).join("\n");
-        let collectHyperlinks = composeXmlString(obj.tempContent.map(x => x.hyperlinks).join("\n"), "MetaTags", 1, ` NoIndex="1"`);
+        let collectHyperlinks = isAddHyperlink
+            ? composeXmlString(obj.tempContent.map(x => x.hyperlinks).join("\n"), "MetaTags", 1, ` NoIndex="1"`)
+            : "";
         for (let docVal in obj.isImport) {
             eachDoc += docVal == "doc_content"
                 ? composeXmlString(fullContext + "\n" + collectHyperlinks, docVal, 1)
@@ -314,7 +304,7 @@ function convertAlltoDocuments(wikiObjs, isAddHyperlink = true) {
     return final.replace(/^\r\n|^\n/gm, "");
 }
 
-function convertAlltoParagraphs(wikiObjs) {
+function convertAlltoParagraphs(wikiObjs, isAddHyperlink = true) {
     let allParagraphs = [];
     let allHyperlinks = [];
     let eachDoc = "";
@@ -330,7 +320,7 @@ function convertAlltoParagraphs(wikiObjs) {
     });
 
     allParagraphs = allParagraphs.join("\n")
-    allHyperlinks = allHyperlinks.join("\n")
+    allHyperlinks = isAddHyperlink ? allHyperlinks.join("\n") : "";
 
     for (let docVal in wikiObjs[0].isImport) {
         eachDoc += docVal == "doc_content"
@@ -342,14 +332,16 @@ function convertAlltoParagraphs(wikiObjs) {
     return composeXmlString(final, "documents", 1).replace(/^\r\n|^\n/gm, "");
 }
 
-function convertParagraphToDocuments(wikiObjs) {
+function convertParagraphToDocuments(wikiObjs, isAddHyperlink = true) {
     let docs = [];
     let eachDoc = "";
     let count = 1;
     wikiObjs.forEach((obj, index) => {
         obj.tempContent.forEach((paraData, ind) => {
+            let hyperlink = isAddHyperlink
+                ? composeXmlString(paraData.hyperlinks, "MetaTags", 1, ` Noindex="1"`) : "";
             let eachWikiDoc = composeXmlString(paraData.paragraphs, "Paragraph", 1)
-                + "\n" + composeXmlString(paraData.hyperlinks, "MetaTags", 1, ` Noindex="1"`);
+                + "\n" + hyperlink
             for (let docVal in obj.isImport) {
                 eachDoc += docVal == "doc_content"
                     ? composeXmlString(eachWikiDoc, docVal, 1)
