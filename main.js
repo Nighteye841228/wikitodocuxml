@@ -31,10 +31,10 @@ const app = new Vue({
             this.isInputEmpty = false;
             this.wikiDocuments = [];
         },
-        parseWikiLinksFromUser: function () {
+        parseWikiLinksFromUser: async function () {
             if (!this.checkForm()) return;
             for (wikiUrl of this.wikiUrls.split('\n')) {
-                if (wikiUrl != "") { getWikisourceJson(wikiUrl); }
+                if (wikiUrl != "") { await getWikisourceJson(wikiUrl); }
             }
         },
         getQueryResult: function () {
@@ -131,7 +131,7 @@ async function getWikisourceJson(pageName) {
             parseAuthor(apiBackJson.text['*']),
             parseHtmlText(apiBackJson.text['*'])
         ));
-        console.log(parseHtmlText(apiBackJson.text['*']));
+        // console.log(parseHtmlText(apiBackJson.text['*']));
     } catch (error) {
         console.log(error);
         alert(`請求出錯！`);
@@ -230,15 +230,38 @@ function WikiXmlMetadata(title = "", author = "", doc_content = [{
 function parseHtmlText(htmlContent) {
     let doc = new DOMParser().parseFromString(htmlContent, "text/html");
     let wikiContentSeperateParagraph = [];
-    $(doc).find(`.mw-parser-output p,.mw-parser-output dd`).each(function (index, element) {
+    let mainContent = $(doc).find(".mw-parser-output p,.mw-parser-output dd");
+
+    if ($(mainContent).text().match(/重定向/g)) {
+        alert(`你的頁面被重新導向至"${$(doc).find(".mw-parser-output a").text()}"，請察看維基文庫頁面確認正確標題或搜尋`);
+    }
+
+    for (let x = 0; x < 10; x++) {
+        $(mainContent).find("*:not(a)").each(function (index, element) {
+            // console.log($(element).html());
+            let x = $(element).html();
+            $(element).replaceWith(x);
+        });
+    }
+
+    $(mainContent).find("a").each(function (index, element) {
+        let linkTitle = $(element).html();
+        let linkRef = $(element).attr('href').match(/^\/wiki\//g)
+            ? `https://zh.wikisource.org${$(element).attr('href')}`
+            : $(element).attr('href');
+        $(element).replaceWith(composeXmlString(linkTitle, "Udef_wiki", 1, ` RefId=${linkRef}`));
+    });
+
+    $(mainContent).each(function (index, element) {
         let parseSentence = $(element).text().replace(/\s/gm, "").replace(/^\r\n|^\n/gm, "");
+        // console.log($(element).html());
         if (!/(屬於公有領域)/gm.test(parseSentence) && parseSentence != "") {
             wikiContentSeperateParagraph.push({
                 paragraphs: parseSentence,
-                hyperlinks: parseHtmlHyperlinkText($(element).html())
+                hyperlinks: $(element).html().replace(/udef_wiki/g, "Udef_wiki").replace(/refid/g, "RefId")
             });
         }
-    });
+    })
     return wikiContentSeperateParagraph;
 }
 
@@ -288,48 +311,39 @@ function convertAlltoDocuments(wikiObjs, isAddHyperlink = true) {
     let eachDoc = "";
     let allDocs = [];
     wikiObjs.forEach((obj, index) => {
-        let fullContext = obj.tempContent.map(x => composeXmlString(x.paragraphs, "Paragraph", 1)).join("\n");
-        let collectHyperlinks = isAddHyperlink
-            ? composeXmlString(obj.tempContent.map(x => x.hyperlinks).join("\n"), "MetaTags", 1, ` NoIndex="1"`)
-            : "";
+        let fullContext = obj.tempContent.map(x => isAddHyperlink ? composeXmlString(x.hyperlinks, "Paragraph", 1) : composeXmlString(x.paragraphs, "Paragraph", 1)).join("\n");
         for (let docVal in obj.isImport) {
             eachDoc += docVal == "doc_content"
-                ? composeXmlString(fullContext + "\n" + collectHyperlinks, docVal, 1)
+                ? composeXmlString(fullContext, docVal, 1)
                 : composeXmlString(obj.isImport[docVal], docVal);
         }
         allDocs.push(composeXmlString(eachDoc, "document", 1, ` filename="${padding(index + 1, 3)}.txt"`));
         eachDoc = "";
     });
-    let final = composeXmlString(allDocs.join("\n"), "documents", 1);
+    let final = endFile(allDocs.join("\n"));
     return final.replace(/^\r\n|^\n/gm, "");
 }
 
 function convertAlltoParagraphs(wikiObjs, isAddHyperlink = true) {
     let allParagraphs = [];
-    let allHyperlinks = [];
     let eachDoc = "";
     wikiObjs.forEach((obj, index) => {
         allParagraphs.push(obj.tempContent
-            .map(x => composeXmlString(x.paragraphs, "Paragraph", 1))
+            .map(x => isAddHyperlink ? composeXmlString(x.hyperlinks, "Paragraph", 1)
+                : composeXmlString(x.paragraphs, "Paragraph", 1))
             .join("\n"));
-        allHyperlinks.push(
-            composeXmlString(obj.tempContent
-                .map(x => x.hyperlinks)
-                .join("\n"), "MetaTags", 1, ` Noindex="1"`)
-        );
     });
 
     allParagraphs = allParagraphs.join("\n")
-    allHyperlinks = isAddHyperlink ? allHyperlinks.join("\n") : "";
 
     for (let docVal in wikiObjs[0].isImport) {
         eachDoc += docVal == "doc_content"
-            ? composeXmlString(allParagraphs + "\n" + allHyperlinks, docVal, 1)
+            ? composeXmlString(allParagraphs, docVal, 1)
             : composeXmlString(wikiObjs[0].isImport[docVal], docVal);
     }
 
     let final = composeXmlString(eachDoc, "document", 1, ` filename="${padding(1, 3)}.txt"`);
-    return composeXmlString(final, "documents", 1).replace(/^\r\n|^\n/gm, "");
+    return endFile(final).replace(/^\r\n|^\n/gm, "");
 }
 
 function convertParagraphToDocuments(wikiObjs, isAddHyperlink = true) {
@@ -338,10 +352,9 @@ function convertParagraphToDocuments(wikiObjs, isAddHyperlink = true) {
     let count = 1;
     wikiObjs.forEach((obj, index) => {
         obj.tempContent.forEach((paraData, ind) => {
-            let hyperlink = isAddHyperlink
-                ? composeXmlString(paraData.hyperlinks, "MetaTags", 1, ` Noindex="1"`) : "";
-            let eachWikiDoc = composeXmlString(paraData.paragraphs, "Paragraph", 1)
-                + "\n" + hyperlink
+            let eachWikiDoc = isAddHyperlink
+                ? composeXmlString(paraData.hyperlinks, "Paragraph", 1)
+                : composeXmlString(paraData.paragraphs, "Paragraph", 1);
             for (let docVal in obj.isImport) {
                 eachDoc += docVal == "doc_content"
                     ? composeXmlString(eachWikiDoc, docVal, 1)
@@ -353,8 +366,12 @@ function convertParagraphToDocuments(wikiObjs, isAddHyperlink = true) {
         });
     });
 
-    let final = composeXmlString(docs.join("\n"), "documents", 1);
+    let final = endFile(docs.join("\n"));
     return final.replace(/^\r\n|^\n/gm, "");
+}
+
+function endFile(data = "") {
+    return `<?xml version="1.0"?>${composeXmlString(composeXmlString(data, "documents", 1), "ThdlPrototypeExport", 1)}`;
 }
 
 function padding(num, length) {
@@ -370,6 +387,6 @@ function isEssensialKey(text) {
 
 function composeXmlString(source, xmlAttribute, isBreak = 0, addValue = "") {
     return (isBreak == 0)
-        ? `<${xmlAttribute}${addValue}>${source}</${xmlAttribute}>\n`
-        : `\n<${xmlAttribute}${addValue}>\n${source}\n</${xmlAttribute}>\n`;
+        ? (`<${xmlAttribute}${addValue}>${source}</${xmlAttribute}>\n`)
+        : (`\n<${xmlAttribute}${addValue}>\n${source}\n</${xmlAttribute}>\n`)
 }
