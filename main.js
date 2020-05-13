@@ -371,7 +371,18 @@ function convertParagraphToDocuments(wikiObjs, isAddHyperlink = true) {
 }
 
 function endFile(data = "") {
-    return `<?xml version="1.0"?>${composeXmlString(composeXmlString(data, "documents", 1), "ThdlPrototypeExport", 1)}`;
+    let corpusContent =
+        `<corpus name="*">
+<metadata_field_settings>
+<author>作者</author>
+<title>Wiki文本標題</title>
+<doc_content>文本內容</doc_content>
+</metadata_field_settings>
+<feature_analysis>
+<tag name="Udef_wiki" type="contentTagging" default_category="Udef_wiki" default_sub_category="-"/>
+</feature_analysis>
+</corpus>`;
+    return `<?xml version="1.0"?>${composeXmlString(corpusContent + composeXmlString(data, "documents", 1), "ThdlPrototypeExport", 1)}`;
 }
 
 function padding(num, length) {
