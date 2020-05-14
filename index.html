@@ -214,6 +214,11 @@
                 </div>
                 <div class="field is-grouped">
                     <div class="control">
+                        <input v-model="filename" class="input" type="text"
+                            style="width: 300px;"
+                            placeholder="設定下載檔名：預設YYYY_MM_DD.xml">
+                    </div>
+                    <div class="control">
                         <button class="button is-link" @click="download">
                             輸出文本
                         </button>

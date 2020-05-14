@@ -1,4 +1,5 @@
 $(document).ready();
+dt = new Date();
 
 const app = new Vue({
     el: "#app",
@@ -69,10 +70,11 @@ const app = new Vue({
         deleteContentValue: function (index) {
             this.wikiDocuments.splice(index, 1);
         },
-        download: function (filename, text) {
-            var element = document.createElement('a');
+        download: function () {
+            let element = document.createElement('a');
+            let filename = this.filename == "" ? `${dt.getFullYear()}_${dt.getMonth()}_${dt.getDate()}.xml` : this.filename;
             element.setAttribute('href', 'data:text/xml;charset=utf-8,' + encodeURIComponent(this.wikiContents));
-            element.setAttribute('download', this.filename);
+            element.setAttribute('download', filename);
             element.style.display = 'none';
             document.body.appendChild(element);
             element.click();
