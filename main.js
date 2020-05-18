@@ -23,7 +23,8 @@ const app = new Vue({
         isAddExtendedLinks: false,
         extendedLinks: [],
         confirmLinks: [],
-        sourceWord: ""
+        sourceWord: "",
+        corpusName: ""
     },
     methods: {
         cleanUrlField: function () {
@@ -98,6 +99,9 @@ const app = new Vue({
             alert(`Copying Success!!`);
         },
         compressToParagraph: function () {
+            for (let wikiDocument of this.wikiDocuments) {
+                wikiDocument.isImport.corpus = this.corpusName;
+            }
             let answer = "";
             if (this.isSeperateByParagraph == "default") {
                 answer = convertAlltoDocuments(this.wikiDocuments, this.isAddHyperlink);
@@ -192,6 +196,7 @@ function WikiXmlMetadata(title = "", author = "", doc_content = [{
     hyperlinks: ""
 }]) {
     this.isImport = {};
+    this.isImport.corpus = title;
     this.isImport.title = title;
     this.isImport.author = author;
     this.isImport.doc_topic_l1 = "";
