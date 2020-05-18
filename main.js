@@ -100,7 +100,7 @@ const app = new Vue({
         },
         compressToParagraph: function () {
             for (let wikiDocument of this.wikiDocuments) {
-                wikiDocument.isImport.corpus = this.corpusName;
+                wikiDocument.isImport.corpus = this.corpusName === "" ? "我的資料集" : this.corpusName;
             }
             let answer = "";
             if (this.isSeperateByParagraph == "default") {
@@ -199,6 +199,7 @@ function WikiXmlMetadata(title = "", author = "", doc_content = [{
     this.isImport.corpus = title;
     this.isImport.title = title;
     this.isImport.author = author;
+    this.isImport.doc_source = title.replace(/\/.*/ig, "");
     this.isImport.doc_topic_l1 = "";
     this.isImport.doc_topic_l2 = "";
     this.isImport.doc_topic_l3 = "";
@@ -226,7 +227,6 @@ function WikiXmlMetadata(title = "", author = "", doc_content = [{
     this.isImport.doc_seq_number = "";
     this.isImport.timeseq_not_before = "";
     this.isImport.timeseq_not_after = "";
-    this.isImport.doc_source = "";
     this.isImport.doc_attachment = "";
     this.isFixContent = false;
     this.isContentOpen = true;
