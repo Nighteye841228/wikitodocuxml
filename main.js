@@ -7,9 +7,7 @@ const app = new Vue({
     },
     data: {
         newDocument: new WikiXmlMetadata(),
-        wikiDocuments: [
-            new WikiXmlMetadata("春曉", "孟浩然", ["春眠不覺曉，處處聞啼鳥。夜來風雨聲，花落知多少。"])
-        ],
+        wikiDocuments: [],
         isInputDataValid: true,
         isMetadataComplete: true,
         isKeepFormat: "Yes",
@@ -24,7 +22,8 @@ const app = new Vue({
         extendedLinks: [],
         confirmLinks: [],
         sourceWord: "",
-        corpusName: ""
+        corpusName: "我的資料集",
+        corpusDefault: "文獻集名稱：預設「我的資料集」"
     },
     methods: {
         cleanUrlField: function () {
@@ -100,7 +99,7 @@ const app = new Vue({
         },
         compressToParagraph: function () {
             for (let wikiDocument of this.wikiDocuments) {
-                wikiDocument.isImport.corpus = this.corpusName === "" ? "我的資料集" : this.corpusName;
+                wikiDocument.isImport.corpus = this.corpusName;
             }
             let answer = "";
             if (this.isSeperateByParagraph == "default") {
