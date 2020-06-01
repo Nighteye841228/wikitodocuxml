@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <link rel="shortcut icon" href="taiwan.ico" type="image/x-icon" />
-    <title>WikiToDocuXML</title>
+    <title>Wiki2DocuXML</title>
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.8.0/css/bulma.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -27,6 +27,28 @@
 
 <body>
     <div id="app">
+
+        <nav class="navbar" role="navigation" aria-label="main navigation">
+            <div class="navbar-end">
+                <a class="navbar-item" target="_blank"
+                    href="https://docusky.org.tw/DocuSky/index2_20181204.html">
+                    首頁
+                </a>
+                <a class="navbar-item" target="_blank"
+                    href="https://docusky.org.tw/DocuSky/docuTools/userMain/">
+                    我的資料庫
+                </a>
+
+                <a role="button" class="navbar-burger" aria-label="menu"
+                    aria-expanded="false">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+        </nav>
+
+
         <div class="modal" :class={'is-active':isAddExtendedLinks}>
             <div class="modal-background"></div>
             <div class="modal-card">
@@ -54,10 +76,10 @@
             <div class="hero-body">
                 <div class="container">
                     <h1 class="title">
-                        WikiToDocuXML
+                        Wiki2DocuXML
                     </h1>
                     <h2 class="subtitle">
-                        維基文庫轉數位人文研究平台建置工具
+                        DocuSky-維基文庫轉數位人文研究平台建置工具
                     </h2>
                 </div>
             </div>
