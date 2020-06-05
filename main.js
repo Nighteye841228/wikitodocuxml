@@ -269,7 +269,9 @@ function parseHtmlText(htmlContent) {
     });
 
     $(mainContent).each(function (index, element) {
-        let parseSentence = $(element).text().replace(/\s/gm, "").replace(/^\r\n|^\n/gm, "");
+        let parseSentence = $(element).text().replace(/\s/gm, "")
+            .replace(/^\r\n|^\n/gm, "")
+            .replace(/（并请在校对之后从条目的源代码中删除本模版：{{简转繁}}）/gm, "");
         // console.log($(element).html());
         if (!/(屬於公有領域)/gm.test(parseSentence) && parseSentence != "") {
             wikiContentSeperateParagraph.push({
