@@ -23,7 +23,8 @@ const app = new Vue({
         confirmLinks: [],
         sourceWord: "",
         corpusName: "我的資料集",
-        corpusDefault: "文獻集名稱：預設「我的資料集」"
+        corpusDefault: "文獻集名稱：預設「我的資料集」",
+        isSelectAllExtendLinks: false
     },
     methods: {
         cleanUrlField: function () {
@@ -110,6 +111,15 @@ const app = new Vue({
                 answer = convertAlltoParagraphs(this.wikiDocuments, this.isAddHyperlink);
             }
             this.wikiContents = answer;
+        },
+        selectAllExtendLinks: function () {
+            if (this.isSelectAllExtendLinks) {
+                this.extendedLinks.forEach((ele) => {
+                    this.confirmLinks.push(ele);
+                });
+            } else {
+                this.confirmLinks.length = 0;
+            }
         }
     }
 });
@@ -238,7 +248,7 @@ function parseHtmlText(htmlContent) {
     let wikiContentSeperateParagraph = [];
     let mainContent = $(doc).find(".mw-parser-output p,.mw-parser-output dd");
 
-    if ($(mainContent).text().match(/重定向/g)) {
+    if ($(mainContent).text() !== undefined && $(mainContent).text().match(/重定向/g)) {
         alert(`你的頁面被重新導向至"${$(doc).find(".mw-parser-output a").text()}"，請察看維基文庫頁面確認正確標題或搜尋`);
     }
 
@@ -252,7 +262,7 @@ function parseHtmlText(htmlContent) {
 
     $(mainContent).find("a").each(function (index, element) {
         let linkTitle = $(element).html();
-        let linkRef = $(element).attr('href').match(/^\/wiki\//g)
+        let linkRef = $(element).attr('href') !== undefined && $(element).attr('href').match(/^\/wiki\//g)
             ? `https://zh.wikisource.org${$(element).attr('href')}`
             : $(element).attr('href');
         $(element).replaceWith(composeXmlString(linkTitle, "Udef_wiki", 1, ` RefId=${linkRef}`));
@@ -275,7 +285,7 @@ function parseAuthor(htmlContent) {
     let doc = new DOMParser().parseFromString(htmlContent, "text/html");
     let wikiAuthor = "";
     $(doc).find(`a`).each(function (index, element) {
-        if ($(element).prop('title').match(/Author:.*/)) {
+        if ($(element).prop('title') !== undefined && $(element).prop('title').match(/Author:.*/)) {
             wikiAuthor = $(element).prop('title').replace(/Author:|（(頁面不存在)*）/g, "");
         }
     });
@@ -289,7 +299,8 @@ function parseHtmlHyperlinkText(htmlContent) {
         if ($(element).attr('href') != undefined
             && $(element).text() !== ""
             && $(element).attr('href').match(/^\/wiki\//g)) {
-            let wikilink = $(element).attr('href').match(/^\/wiki\//g)
+            let wikilink = $(element).attr('href') !== undefined
+                && $(element).attr('href').match(/^\/wiki\//g)
                 ? `https://zh.wikisource.org${$(element).attr('href')}`
                 : $(element).attr('href');
             wikiContentSeperateParagraph.push(

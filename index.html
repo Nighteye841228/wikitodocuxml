@@ -68,6 +68,9 @@
                         @click="confirmAdd(1)">Save changes</button>
                     <button class="button"
                         @click="confirmAdd(0)">Cancel</button>
+                    <div><input type="checkbox" @change="selectAllExtendLinks"
+                            v-model="isSelectAllExtendLinks">全選
+                    </div>
                 </footer>
             </div>
         </div>
