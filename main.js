@@ -306,7 +306,7 @@ function parseHtmlHyperlinkText(htmlContent) {
                 ? `https://zh.wikisource.org${$(element).attr('href')}`
                 : $(element).attr('href');
             wikiContentSeperateParagraph.push(
-                `<Udef_wiki RefId="${wikilink}">${$(element).text()}<Udef_wiki>`);
+                `<Udef_wiki Term="${$(element).text()}" RefId="${wikilink}">${$(element).text()}<Udef_wiki>`);
         }
     });
     return wikiContentSeperateParagraph.join("\n");
