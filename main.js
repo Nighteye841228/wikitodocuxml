@@ -35,8 +35,8 @@ const app = new Vue({
         },
         parseWikiLinksFromUser: async function () {
             if (!this.checkForm()) return;
-            for (wikiUrl of this.wikiUrls.split('\n')) {
-                if (wikiUrl != "") { await getWikisourceJson(wikiUrl); }
+            for (wikiUrl of this.wikiUrls.split('\n').filter(x => x)) {
+                await getWikisourceJson(wikiUrl);
             }
         },
         getQueryResult: function () {
@@ -157,7 +157,7 @@ async function getWikisourceJson(pageName) {
 }
 
 async function getDeeperLink(pageNames) {
-    pageNames = pageNames.split('\n');
+    pageNames = pageNames.split('\n').filter(x => x);
     for (pageName of pageNames) {
         try {
             let apiBackJson = await axios.get("https://zh.wikisource.org/w/api.php",
