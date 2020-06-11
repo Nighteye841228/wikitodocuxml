@@ -22,7 +22,7 @@ const app = new Vue({
         extendedLinks: [],
         confirmLinks: [],
         sourceWord: "",
-        corpusName: "我的資料集",
+        corpusName: "",
         corpusDefault: "文獻集名稱：預設「我的資料集」",
         isSelectAllExtendLinks: false
     },
@@ -103,7 +103,7 @@ const app = new Vue({
                 return a.order > b.order ? 1 : -1;
             });
             for (let wikiDocument of this.wikiDocuments) {
-                wikiDocument.isImport.corpus = this.corpusName;
+                wikiDocument.isImport.corpus = this.corpusName === "" ? "我的資料集" : this.corpusName;
             }
             let answer = "";
             if (this.isSeperateByParagraph == "default") {

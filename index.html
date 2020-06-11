@@ -110,8 +110,11 @@
             <form @submit.prevent="checkForm" method="POST">
                 <div class="container">
                     <div class="field">
-                        <label class="label is-large">在此輸入欲獲得內容之完整文本標題<span
-                                style="font-size:12pt">（可輸入多筆分行，系統將自動彙整）</span>
+                        <label class="label is-large">
+                            <p>在此輸入欲獲得內容之完整文本標題</p>
+                            <p
+                                style="font-size:12pt;color:gray;margin:5px 0px;">
+                                (可輸入多筆分行，系統將自動彙整，每一行內容都要完全符合wiki上的網頁標題，目前尚未支援重新導向頁面自動抓取)</span>
                         </label>
                         <div class="control">
                             <textarea rows="10" class="textarea"
@@ -147,7 +150,7 @@
 
         <div class="section" v-if="isInputDataValid">
             <div class="container">
-                <label class="label is-large">Metadata編輯(未填入資料則不會輸出欄位)</label>
+                <label class="label is-large">Metadata編輯</label>
                 <div class="field">
                     <div class="control">
                         <div class="table-container">
