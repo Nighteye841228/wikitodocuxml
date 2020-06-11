@@ -156,6 +156,7 @@
                                 <thead>
                                     <tr>
                                         <th>文檔標題</th>
+                                        <td>文件排序</td>
                                         <td>作者</td>
                                         <td>文本內容檢視</td>
                                         <td>刪除此文本</td>
@@ -166,6 +167,10 @@
                                     <tr>
                                         <th>{{ wikiDocument.isImport.title }}
                                         </th>
+                                        <td><input type="number"
+                                                class="input is-normal"
+                                                v-model="wikiDocument.order">
+                                        </td>
                                         <td><input type="text"
                                                 class="input is-normal"
                                                 v-model="wikiDocument.isImport.author">

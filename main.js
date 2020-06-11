@@ -99,6 +99,9 @@ const app = new Vue({
             alert(`Copying Success!!`);
         },
         compressToParagraph: function () {
+            this.wikiDocuments = this.wikiDocuments.sort(function (a, b) {
+                return a.order > b.order ? 1 : -1;
+            });
             for (let wikiDocument of this.wikiDocuments) {
                 wikiDocument.isImport.corpus = this.corpusName;
             }
@@ -241,6 +244,7 @@ function WikiXmlMetadata(title = "", author = "", doc_content = [{
     this.isContentOpen = true;
     this.tempContent = doc_content;
     this.fulltext = doc_content.map(x => x.paragraphs).join("\n");
+    this.order = 0;
 }
 
 function parseHtmlText(htmlContent) {
