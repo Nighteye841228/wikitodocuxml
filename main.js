@@ -147,7 +147,7 @@ async function getWikisourceJson(pageName) {
         app.wikiDocuments.push(new WikiXmlMetadata(
             apiBackJson.title,
             parseAuthor(apiBackJson.text['*']),
-            parseHtmlText(apiBackJson.text['*'])
+            parseHtmlText(apiBackJson.text['*'], apiBackJson.title)
         ));
         // console.log(parseHtmlText(apiBackJson.text['*']));
     } catch (error) {
@@ -247,13 +247,13 @@ function WikiXmlMetadata(title = "", author = "", doc_content = [{
     this.order = 0;
 }
 
-function parseHtmlText(htmlContent) {
+function parseHtmlText(htmlContent, title) {
     let doc = new DOMParser().parseFromString(htmlContent, "text/html");
     let wikiContentSeperateParagraph = [];
     let mainContent = $(doc).find(".mw-parser-output p,.mw-parser-output dd");
 
     if ($(mainContent).text() !== undefined && $(mainContent).text().match(/重定向/g)) {
-        alert(`你的頁面被重新導向至"${$(doc).find(".mw-parser-output a").text()}"，請察看維基文庫頁面確認正確標題或搜尋`);
+        alert(`頁面:"${title}"被重新導向至"${$(doc).find(".mw-parser-output a").text()}"，請察看維基文庫頁面確認正確標題或搜尋`);
     }
 
     for (let x = 0; x < 10; x++) {
