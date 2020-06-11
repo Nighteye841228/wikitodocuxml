@@ -187,11 +187,21 @@
                                         </td>
 
                                     </tr>
-                                    <tr>
-                                        <td v-if="wikiDocument.isFixContent"
+                                    <tr
+                                        v-for="text in wikiDocument.tempContent">
+                                        <td v-if="wikiDocument.isFixContent && isAddHyperlink"
                                             colspan="5">
-                                            <textarea class="textarea"
-                                                v-model="wikiDocument.fulltext"></textarea>
+                                            <div>
+                                                <textarea class="textarea"
+                                                    v-model="text.hyperlinks"></textarea>
+                                            </div>
+                                        </td>
+                                        <td v-if="wikiDocument.isFixContent && !isAddHyperlink"
+                                            colspan="5">
+                                            <div>
+                                                <textarea class="textarea"
+                                                    v-model="text.paragraphs"></textarea>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
