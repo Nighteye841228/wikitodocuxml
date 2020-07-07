@@ -269,18 +269,19 @@ function parseHtmlText(htmlContent, title) {
         let linkRef = $(element).attr('href') !== undefined && $(element).attr('href').match(/^\/wiki\//g)
             ? `https://zh.wikisource.org${$(element).attr('href')}`
             : $(element).attr('href');
-        $(element).replaceWith(composeXmlString(linkTitle, "Udef_wiki", 1, ` RefId=${linkRef}`));
+        $(element).replaceWith(composeXmlString(linkTitle, "Udef_wiki", 1, ` Term="${linkTitle}" RefId="${linkRef}"`));
     });
 
     $(mainContent).each(function (index, element) {
         let parseSentence = $(element).text().replace(/\s/gm, "")
             .replace(/^\r\n|^\n/gm, "")
-            .replace(/（并请在校对之后从条目的源代码中删除本模版：{{简转繁}}）/gm, "");
-        // console.log($(element).html());
+            .replace(/（并请在校对之后从条目的源代码中删除本模版：{{简转繁}}）/gm, "")
+            .replace(/<(\W+)>/g, "【$1】");
+        let parseSentenceWithHtml = $(element).html().replace(/<(\W+)>/g, "【$1】");
         if (!/(屬於公有領域)/gm.test(parseSentence) && parseSentence != "") {
             wikiContentSeperateParagraph.push({
                 paragraphs: parseSentence,
-                hyperlinks: $(element).html().replace(/udef_wiki/g, "Udef_wiki").replace(/refid/g, "RefId")
+                hyperlinks: parseSentenceWithHtml.replace(/udef_wiki/g, "Udef_wiki").replace(/refid/g, "RefId").replace(/term/g, "Term")
             });
         }
     })

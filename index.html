@@ -130,18 +130,16 @@
                     <div class="field is-grouped">
                         <div class="control">
                             <input value="延伸搜索相關文本" type="button"
-                                @click="searchDeeper" class="button is-link" />
+                                title="抓取該文本提及的其他文本" @click="searchDeeper"
+                                class="button is-link is-light" />
                         </div>
+                    </div>
+                    <div class="field is-grouped">
                         <div class="control">
                             <input value="獲取內文" type="button"
+                                title="抓取該文本的wiki內容"
                                 @click="parseWikiLinksFromUser"
                                 class="button is-link" />
-                        </div>
-                        <div class="control">
-                            <button class="button is-link is-light"
-                                type="button" @click="cleanUrlField">
-                                清空內容
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -150,7 +148,7 @@
 
         <div class="section" v-if="isInputDataValid">
             <div class="container">
-                <label class="label is-large">Metadata編輯</label>
+                <label class="label is-large">Metadata編輯&預覽</label>
                 <div class="field">
                     <div class="control">
                         <div class="table-container">
@@ -207,7 +205,6 @@
                                 </tbody>
                             </table>
                         </div>
-
                         <div class="field is-grouped">
                             <div class="control">
                                 <input class="input" type="text"
@@ -224,6 +221,15 @@
                                 <input type="checkbox"
                                     v-model="isAddHyperlink">是否紀錄超連結
                             </label>
+                        </div>
+                        <div class="field is-grouped">
+                            <div class="control">
+                                <button class="button is-link is-danger"
+                                    title="清空目前所有抓取到的文件" type="button"
+                                    @click="cleanUrlField">
+                                    清空內容
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -276,6 +282,12 @@
                             v-clipboard:success="onCopy">
                             複製於剪貼簿
                         </button>
+                    </div>
+                </div>
+                <div class="field is-grouped">
+                    <div class="control">
+                        <input value="重置所有內容" type="button" @click=""
+                            title="重置頁面目前暫存的所有資料" class="button is-danger" />
                     </div>
                 </div>
             </div>
